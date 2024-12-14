@@ -4,11 +4,11 @@ The React project from my web development course @ IT School
 
 ## Demo
 
-The project is deployed at
+The project is deployed at https://it-school-newsapp-project.netlify.app/
 
 ## Local Usage
 
-After downloading/cloning the project, run the following commands: https://it-school-newsapp-project.netlify.app/
+After downloading/cloning the project, run the following commands: 
 
 ```
 * npm install
