@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { useParams } from "react-router-dom";
 import Layout from "../components/Layout";
 import Container from "react-bootstrap/Container";
@@ -12,44 +12,50 @@ import "./NewsDetails.css";
 import { getFormattedDate } from "../utils/date";
 import { addToFavorites } from "../store/Favorites/actions";
 import { FavoritesContext } from "../store/Favorites/context";
+import Alert from "react-bootstrap/Alert";
+import { Link } from "react-router-dom";
 
 function NewsDetails() {
-  // Extragem functia care modifica state-ul global.
   const { favoritesDispatch } = useContext(FavoritesContext);
-  // Extragem parametrul venit din URL.
   let { newsId } = useParams();
-  // Vrem ca id-ul extras din URL sa contina /-urile, asa ca il decodam.
   newsId = decodeURIComponent(newsId);
-  // Generam endpointul pentru detaliile stirii.
   const newsDetailsEndpoint = getNewsDetailsEndpoint(newsId);
-  // Cerem datele de la server.
   const newsDetails = useFetch(newsDetailsEndpoint);
-  // Adaptam datele de la server la datele de care au nevoie componentele de react.
   const adaptedNewsDetails = getNewsDetails(newsDetails);
 
-  // Extragem campurile de interes din datele adaptate.
+  const [alertDisplay, setAlertDisplay] = useState(false);
+
   const { title, description, image, date, author, content, thumbnail } =
     adaptedNewsDetails;
-  // Formatam data.
   const formattedDate = getFormattedDate(date);
 
   function handleAddToFavorites(product) {
-    // Apelam actiunea de adaugare la favorite.
     const actionResult = addToFavorites(product);
-    // Trimitem rezultatul actiunii catre reducer.
     favoritesDispatch(actionResult);
+    setAlertDisplay(true);
+    setTimeout(() => {
+      setAlertDisplay(false);
+    }, 2000);
   }
 
   return (
     <Layout>
+      {alertDisplay && (
+        <Alert variant="success" id="alert">
+          Știrea a fost adăugată cu success la{" "}
+          <Link to="/favorites" className="text-secondary">
+            Favorite
+          </Link>
+          .
+        </Alert>
+      )}
+
       <Container className="NewsDetails my-5">
         <Row className="d-flex justify-content-center">
           <Col xs={12} lg={8}>
             <h1 className="pt-3 mb-5">{title}</h1>
             <p className="fw-bold">{description}</p>
             <div
-              // De la The Guardian imaginea ne vine sub forma de tag-uri de html.
-              // Pentru a afisa html pe ecran, avem nevoie de prop-ul dangerouslySetInnerHTML.
               dangerouslySetInnerHTML={{ __html: image }}
               className="mb-4"
             ></div>
@@ -60,7 +66,6 @@ function NewsDetails() {
               </div>
               <Button
                 onClick={() => {
-                  // Construim payload-ul actiunii si apelam functia care trimite actiunea catre reducer.
                   handleAddToFavorites({
                     id: newsId,
                     thumbnail,
@@ -73,8 +78,6 @@ function NewsDetails() {
                 Adaugă la favorite
               </Button>
             </div>
-            {/* De la The Guardian continutul ne vine sub forma de tag-uri de html. */}
-            {/* Pentru a afisa html pe ecran, avem nevoie de prop-ul dangerouslySetInnerHTML. */}
             <div dangerouslySetInnerHTML={{ __html: content }}></div>
           </Col>
         </Row>
